@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>MiniC 学习手册 · 从源码到执行</title>
+<style>
+:root{--ink:#172f32;--muted:#506665;--line:#c8d4cc;--paper:#f8f8f2;--mint:#e1eee5;--green:#165b50;--dark:#173c39;--gold:#f8d883;--mono:"IBM Plex Mono",Consolas,"Liberation Mono",monospace;--sans:"Source Sans 3","Noto Sans CJK SC","Microsoft YaHei",sans-serif}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 var(--sans);background:var(--paper);color:var(--ink)}button,select,input{font:inherit}button,a,select,input{touch-action:manipulation}button{cursor:pointer}button:disabled{opacity:.45;cursor:default}a{color:var(--green);text-underline-offset:.23em}:focus-visible{outline:3px solid #bc6807;outline-offset:3px}header{border-bottom:1px solid var(--line);background:#fffefa}.bar{max-width:1340px;padding:18px 4vw;margin:auto;display:flex;align-items:center;gap:.9rem}.mark{font:700 17px/1 var(--mono);color:var(--gold);background:var(--dark);border-radius:6px;padding:10px 8px}.brand{font-size:1.1rem;font-weight:700}.bar small{margin-left:auto;color:var(--muted)}
+.shell{max-width:1340px;margin:auto;padding:0 4vw 3rem;display:grid;grid-template-columns:197px minmax(0,1fr);gap:clamp(28px,4.5vw,74px)}aside{align-self:start;position:sticky;top:0;padding:36px 0 0}aside h2,.caption,.meta{font-size:.84rem;letter-spacing:.055em;font-weight:650;color:var(--muted)}nav{margin-top:1rem;display:grid;gap:4px}nav a{display:flex;align-items:center;gap:13px;padding:9px 12px;text-decoration:none;border-radius:5px;color:var(--muted)}nav a:hover{background:#ecf1ea}nav a[aria-current=page]{background:var(--mint);color:var(--green);font-weight:750}nav span{font:13px var(--mono)}main{min-width:0;padding-top:clamp(28px,4vw,55px)}.meta{color:var(--green);margin:0 0 .45rem}.chapter{font:600 .83rem var(--mono);color:var(--green);padding-right:10px}h1,h2,h3,p{margin:0}h1{font-size:clamp(2.1rem,3.8vw,3.6rem);line-height:1.2;letter-spacing:-.045em;font-family:"Noto Serif CJK SC","Songti SC",serif}.lead{max-width:52em;margin:.95rem 0 1.65rem;color:var(--muted);line-height:1.85}
+.lab,.quiz,details{border:1px solid var(--line);border-radius:9px;background:#fffefa}.lab{overflow:hidden}.labhead{display:flex;align-items:center;gap:10px;padding:12px 19px;background:#e9f0e7;border-bottom:1px solid var(--line)}.labhead:before{content:"";width:9px;height:9px;background:var(--green);border-radius:2px}.labhead h2{font-size:1rem}.labbody{padding:clamp(14px,2vw,26px)}.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}.caption{display:block;margin-bottom:.5rem}.board{background:var(--dark);border-radius:6px;color:#f4fcf5;padding:17px;min-width:0}pre,code{font-family:var(--mono)}pre{margin:0;font-size:.88rem;line-height:1.7;white-space:pre;overflow:auto;tab-size:4;max-height:370px}.board .caption{color:#b2cdbe}mark{background:var(--gold);color:#132c29;border-radius:2px}.controls{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:.3rem 0 1rem}.btn,select{background:#fffefa;color:var(--ink);border:1px solid #adbfb4;border-radius:5px;padding:6px 12px;font-size:.92rem}.btn:hover:not(:disabled){border-color:var(--green)}.btn[aria-pressed=true],.primary{background:var(--green);color:white;border-color:var(--green)}.hint{margin-top:1rem;color:var(--muted)}.note{border-left:3px solid #b8842a;padding:.4rem 0 .4rem 14px;margin:.9rem 0}.lesson{margin:1.65rem 0}.lesson h2,.quiz h2{font-size:1.16rem;margin-bottom:.4rem}.lesson p{max-width:55em}.quiz,details{padding:14px 18px;margin-top:14px}.quiz .controls{margin:.85rem 0 .1rem}.feedback{color:var(--green);font-weight:650}.feedback:not(:empty){margin-top:10px}summary{cursor:pointer;color:var(--green);font-weight:650}details .board{margin:1rem 0 .6rem}.footnav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:1.5rem 0}.footnav a{padding:7px 12px;text-decoration:none;border-radius:5px}.footnav .primary{color:#fff}.foot{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:1rem}.tokens{display:flex;flex-wrap:wrap;gap:5px}.tokens button{font-family:var(--mono);min-width:33px}.rows{display:grid;gap:3px}.rows button{text-align:left;font-family:var(--mono)}.big{font:600 clamp(1.5rem,3vw,2.3rem) var(--mono);color:var(--green)}.track{width:100%;accent-color:var(--green)}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}.stat{padding:9px 13px;background:#f1f4ec;border-radius:5px}.stat strong{font:600 1rem var(--mono);overflow-wrap:anywhere}.status{font:600 .9rem var(--mono);color:var(--green)}.path{display:flex;gap:.5em;flex-wrap:wrap;margin-top:16px}.path a{padding:3px 7px;border-bottom:2px solid var(--line);text-decoration:none}.path a:hover{border-color:var(--green)}.welcome{background-color:#e9f0e7;background-image:radial-gradient(#b9cabc 1px,transparent 1px);background-size:14px 14px;padding:18px;border-radius:6px}.welcome .board{box-shadow:4px 4px #c6d5ca}.welcome p{background:#e9f0e7;display:table}.result{padding:8px 12px;margin-top:10px;background:#eff3e8;white-space:pre-wrap}.lab select{max-width:100%}label{font-weight:650}.skip{position:absolute;left:-9999px}.skip:focus{position:relative;left:1em}
+@media(max-width:780px){.shell{display:block;padding:0 5vw 2rem}.bar{padding:12px 5vw}.bar small{display:none}aside{position:static;padding-top:14px}aside h2{margin:0}nav{display:flex;flex-wrap:wrap;gap:2px;margin-top:4px}nav a{padding:4px 8px;font-size:.86rem;gap:5px}nav span{font-size:.68rem}main{padding-top:20px}.split{grid-template-columns:1fr}.board{padding:12px}h1{letter-spacing:-.03em}.welcome{padding:12px}.lead{margin-bottom:1.1rem}}
+</style>
+</head>
+<body><a class="skip" href="#title">跳到正文</a>
+<header><div class="bar"><span class="mark" aria-hidden="true">&gt;_</span><span class="brand">MiniC 学习手册</span><small>编译原理课程设计</small></div></header>
+<div class="shell"><aside><h2>学习路线</h2><nav id="nav" aria-label="章节目录"></nav></aside>
+<main><p class="meta"><span class="chapter" id="counter"></span><span id="topic"></span></p><h1 id="title" tabindex="-1">从源码到执行</h1><p class="lead" id="lead"></p>
+<section class="lab"><div class="labhead"><h2 id="labtitle"></h2></div><div id="lab" class="labbody"></div></section>
+<section class="lesson"><h2 id="why"></h2><p id="explain"></p></section>
+<details id="implementation"><summary id="summary"></summary><div class="board"><pre id="snippet"></pre></div><a id="filelink">打开完整文件</a></details>
+<section class="quiz"><h2>停一下，想一想</h2><p id="question"></p><div class="controls" id="answers"></div><p class="feedback" id="feedback" role="status"></p></section>
+<div class="footnav" id="footnav"></div><footer class="foot">例程与执行记录取自本仓库。编排参考 <a href="https://www.chaoxi.online/nanovllm-academy-introduction/">朝汐的学习手册</a>。</footer></main></div>
+<noscript>请启用 JavaScript 以切换章节和回放实验。</noscript>
+<script type="application/json" id="dataset">
+{"loop":{"src":"int x = 0;\nwhile (x \u003c 3) {\n    x = x + 1;\n}","out":{"tokens":"1:1\tKEYWORD\tint\n1:5\tIDENT\tx\n1:7\tOP\t=\n1:9\tINTEGER\t0\n1:10\tDELIMITER\t;\n2:1\tKEYWORD\twhile\n2:7\tDELIMITER\t(\n2:8\tIDENT\tx\n2:10\tOP\t\u003c\n2:12\tINTEGER\t3\n2:13\tDELIMITER\t)\n2:15\tDELIMITER\t{\n3:5\tIDENT\tx\n3:7\tOP\t=\n3:9\tIDENT\tx\n3:11\tOP\t+\n3:13\tINTEGER\t1\n3:14\tDELIMITER\t;\n4:1\tDELIMITER\t}\n4:2\tEOF\t","ast":"Program\n  Declare int x\n    Literal 0\n  While\n    Binary \u003c\n      Variable x\n      Literal 3\n    Block\n      Assign x\n        Binary +\n          Variable x\n          Literal 1","symbols":"语义检查通过\n名称\t类型\t作用域\t存储名\nx\tint\t0\tx@0","tac":"x@0 = \u003c未初始化>\nx@0 = 0\nLabel L1\n%t1 = x@0 \u003c 3\nCjmp (%t1, L2, L3)\nLabel L2\n%t2 = x@0 + 1\nx@0 = %t2\nJmp L1\nLabel L3","target":"CLEAR x@0\nPUSH 0\nSTORE x@0\nLABEL L1\nLOAD x@0\nPUSH 3\nLT\nSTORE %t1\nLOAD %t1\nJTRUE L2\nJMP L3\nLABEL L2\nLOAD x@0\nPUSH 1\nADD\nSTORE %t2\nLOAD %t2\nSTORE x@0\nJMP L1\nLABEL L3","result":"x = 3"},"error":""},"arithmetic":{"src":"int a = 2 + 3 * 4;\nint b = (2 + 3) * 4;\nint difference;\ndifference = b - a;\nint quotient = -7 / 2;","out":{"tokens":"1:1\tKEYWORD\tint\n1:5\tIDENT\ta\n1:7\tOP\t=\n1:9\tINTEGER\t2\n1:11\tOP\t+\n1:13\tINTEGER\t3\n1:15\tOP\t*\n1:17\tINTEGER\t4\n1:18\tDELIMITER\t;\n2:1\tKEYWORD\tint\n2:5\tIDENT\tb\n2:7\tOP\t=\n2:9\tDELIMITER\t(\n2:10\tINTEGER\t2\n2:12\tOP\t+\n2:14\tINTEGER\t3\n2:15\tDELIMITER\t)\n2:17\tOP\t*\n2:19\tINTEGER\t4\n2:20\tDELIMITER\t;\n3:1\tKEYWORD\tint\n3:5\tIDENT\tdifference\n3:15\tDELIMITER\t;\n4:1\tIDENT\tdifference\n4:12\tOP\t=\n4:14\tIDENT\tb\n4:16\tOP\t-\n4:18\tIDENT\ta\n4:19\tDELIMITER\t;\n5:1\tKEYWORD\tint\n5:5\tIDENT\tquotient\n5:14\tOP\t=\n5:16\tOP\t-\n5:17\tINTEGER\t7\n5:19\tOP\t/\n5:21\tINTEGER\t2\n5:22\tDELIMITER\t;\n5:23\tEOF\t","ast":"Program\n  Declare int a\n    Binary +\n      Literal 2\n      Binary *\n        Literal 3\n        Literal 4\n  Declare int b\n    Binary *\n      Binary +\n        Literal 2\n        Literal 3\n      Literal 4\n  Declare int difference\n  Assign difference\n    Binary -\n      Variable b\n      Variable a\n  Declare int quotient\n    Binary /\n      Unary -\n        Literal 7\n      Literal 2","symbols":"语义检查通过\n名称\t类型\t作用域\t存储名\na\tint\t0\ta@0\nb\tint\t0\tb@0\ndifference\tint\t0\tdifference@0\nquotient\tint\t0\tquotient@0","tac":"a@0 = \u003c未初始化>\n%t1 = 3 * 4\n%t2 = 2 + %t1\na@0 = %t2\nb@0 = \u003c未初始化>\n%t3 = 2 + 3\n%t4 = %t3 * 4\nb@0 = %t4\ndifference@0 = \u003c未初始化>\n%t5 = b@0 - a@0\ndifference@0 = %t5\nquotient@0 = \u003c未初始化>\n%t6 = - 7\n%t7 = %t6 / 2\nquotient@0 = %t7","target":"CLEAR a@0\nPUSH 3\nPUSH 4\nMUL\nSTORE %t1\nPUSH 2\nLOAD %t1\nADD\nSTORE %t2\nLOAD %t2\nSTORE a@0\nCLEAR b@0\nPUSH 2\nPUSH 3\nADD\nSTORE %t3\nLOAD %t3\nPUSH 4\nMUL\nSTORE %t4\nLOAD %t4\nSTORE b@0\nCLEAR difference@0\nLOAD b@0\nLOAD a@0\nSUB\nSTORE %t5\nLOAD %t5\nSTORE difference@0\nCLEAR quotient@0\nPUSH 7\nNEG\nSTORE %t6\nLOAD %t6\nPUSH 2\nDIV\nSTORE %t7\nLOAD %t7\nSTORE quotient@0","result":"a = 14\nb = 20\ndifference = 6\nquotient = -3"},"error":""},"branch":{"src":"int score = 75;\nbool passed = score >= 60 && score \u003c= 100;\nint grade = 0;\nif (passed) {\n    grade = 1;\n}\nif (!passed || score == 100) {\n    grade = 2;\n} else {\n    grade = grade + 10;\n}\n// 两个右操作数都会除零；短路求值保证它们不会执行。\nbool safeAnd = false && (1 / 0 > 0);\nbool safeOr = true || (1 / 0 != 0);","out":{"tokens":"1:1\tKEYWORD\tint\n1:5\tIDENT\tscore\n1:11\tOP\t=\n1:13\tINTEGER\t75\n1:15\tDELIMITER\t;\n2:1\tKEYWORD\tbool\n2:6\tIDENT\tpassed\n2:13\tOP\t=\n2:15\tIDENT\tscore\n2:21\tOP\t>=\n2:24\tINTEGER\t60\n2:27\tOP\t&&\n2:30\tIDENT\tscore\n2:36\tOP\t\u003c=\n2:39\tINTEGER\t100\n2:42\tDELIMITER\t;\n3:1\tKEYWORD\tint\n3:5\tIDENT\tgrade\n3:11\tOP\t=\n3:13\tINTEGER\t0\n3:14\tDELIMITER\t;\n4:1\tKEYWORD\tif\n4:4\tDELIMITER\t(\n4:5\tIDENT\tpassed\n4:11\tDELIMITER\t)\n4:13\tDELIMITER\t{\n5:5\tIDENT\tgrade\n5:11\tOP\t=\n5:13\tINTEGER\t1\n5:14\tDELIMITER\t;\n6:1\tDELIMITER\t}\n7:1\tKEYWORD\tif\n7:4\tDELIMITER\t(\n7:5\tOP\t!\n7:6\tIDENT\tpassed\n7:13\tOP\t||\n7:16\tIDENT\tscore\n7:22\tOP\t==\n7:25\tINTEGER\t100\n7:28\tDELIMITER\t)\n7:30\tDELIMITER\t{\n8:5\tIDENT\tgrade\n8:11\tOP\t=\n8:13\tINTEGER\t2\n8:14\tDELIMITER\t;\n9:1\tDELIMITER\t}\n9:3\tKEYWORD\telse\n9:8\tDELIMITER\t{\n10:5\tIDENT\tgrade\n10:11\tOP\t=\n10:13\tIDENT\tgrade\n10:19\tOP\t+\n10:21\tINTEGER\t10\n10:23\tDELIMITER\t;\n11:1\tDELIMITER\t}\n13:1\tKEYWORD\tbool\n13:6\tIDENT\tsafeAnd\n13:14\tOP\t=\n13:16\tBOOLEAN\tfalse\n13:22\tOP\t&&\n13:25\tDELIMITER\t(\n13:26\tINTEGER\t1\n13:28\tOP\t/\n13:30\tINTEGER\t0\n13:32\tOP\t>\n13:34\tINTEGER\t0\n13:35\tDELIMITER\t)\n13:36\tDELIMITER\t;\n14:1\tKEYWORD\tbool\n14:6\tIDENT\tsafeOr\n14:13\tOP\t=\n14:15\tBOOLEAN\ttrue\n14:20\tOP\t||\n14:23\tDELIMITER\t(\n14:24\tINTEGER\t1\n14:26\tOP\t/\n14:28\tINTEGER\t0\n14:30\tOP\t!=\n14:33\tINTEGER\t0\n14:34\tDELIMITER\t)\n14:35\tDELIMITER\t;\n14:36\tEOF\t","ast":"Program\n  Declare int score\n    Literal 75\n  Declare bool passed\n    Binary &&\n      Binary >=\n        Variable score\n        Literal 60\n      Binary \u003c=\n        Variable score\n        Literal 100\n  Declare int grade\n    Literal 0\n  If\n    Variable passed\n    Block\n      Assign grade\n        Literal 1\n  If\n    Binary ||\n      Unary !\n        Variable passed\n      Binary ==\n        Variable score\n        Literal 100\n    Block\n      Assign grade\n        Literal 2\n    Block\n      Assign grade\n        Binary +\n          Variable grade\n          Literal 10\n  Declare bool safeAnd\n    Binary &&\n      Literal false\n      Binary >\n        Binary /\n          Literal 1\n          Literal 0\n        Literal 0\n  Declare bool safeOr\n    Binary ||\n      Literal true\n      Binary !=\n        Binary /\n          Literal 1\n          Literal 0\n        Literal 0","symbols":"语义检查通过\n名称\t类型\t作用域\t存储名\nscore\tint\t0\tscore@0\npassed\tbool\t0\tpassed@0\ngrade\tint\t0\tgrade@0\nsafeAnd\tbool\t0\tsafeAnd@0\nsafeOr\tbool\t0\tsafeOr@0","tac":"score@0 = \u003c未初始化>\nscore@0 = 75\npassed@0 = \u003c未初始化>\n%t2 = score@0 >= 60\n%t1 = %t2\nCjmp (%t1, L1, L2)\nLabel L1\n%t3 = score@0 \u003c= 100\n%t1 = %t3\nLabel L2\npassed@0 = %t1\ngrade@0 = \u003c未初始化>\ngrade@0 = 0\nCjmp (passed@0, L3, L4)\nLabel L3\ngrade@0 = 1\nLabel L4\n%t5 = ! passed@0\n%t4 = %t5\nCjmp (%t4, L9, L8)\nLabel L8\n%t6 = score@0 == 100\n%t4 = %t6\nLabel L9\nCjmp (%t4, L5, L7)\nLabel L5\ngrade@0 = 2\nJmp L6\nLabel L7\n%t7 = grade@0 + 10\ngrade@0 = %t7\nLabel L6\nsafeAnd@0 = \u003c未初始化>\n%t8 = false\nCjmp (%t8, L10, L11)\nLabel L10\n%t9 = 1 / 0\n%t10 = %t9 > 0\n%t8 = %t10\nLabel L11\nsafeAnd@0 = %t8\nsafeOr@0 = \u003c未初始化>\n%t11 = true\nCjmp (%t11, L13, L12)\nLabel L12\n%t12 = 1 / 0\n%t13 = %t12 != 0\n%t11 = %t13\nLabel L13\nsafeOr@0 = %t11","target":"CLEAR score@0\nPUSH 75\nSTORE score@0\nCLEAR passed@0\nLOAD score@0\nPUSH 60\nGE\nSTORE %t2\nLOAD %t2\nSTORE %t1\nLOAD %t1\nJTRUE L1\nJMP L2\nLABEL L1\nLOAD score@0\nPUSH 100\nLE\nSTORE %t3\nLOAD %t3\nSTORE %t1\nLABEL L2\nLOAD %t1\nSTORE passed@0\nCLEAR grade@0\nPUSH 0\nSTORE grade@0\nLOAD passed@0\nJTRUE L3\nJMP L4\nLABEL L3\nPUSH 1\nSTORE grade@0\nLABEL L4\nLOAD passed@0\nNOT\nSTORE %t5\nLOAD %t5\nSTORE %t4\nLOAD %t4\nJTRUE L9\nJMP L8\nLABEL L8\nLOAD score@0\nPUSH 100\nEQ\nSTORE %t6\nLOAD %t6\nSTORE %t4\nLABEL L9\nLOAD %t4\nJTRUE L5\nJMP L7\nLABEL L5\nPUSH 2\nSTORE grade@0\nJMP L6\nLABEL L7\nLOAD grade@0\nPUSH 10\nADD\nSTORE %t7\nLOAD %t7\nSTORE grade@0\nLABEL L6\nCLEAR safeAnd@0\nPUSH false\nSTORE %t8\nLOAD %t8\nJTRUE L10\nJMP L11\nLABEL L10\nPUSH 1\nPUSH 0\nDIV\nSTORE %t9\nLOAD %t9\nPUSH 0\nGT\nSTORE %t10\nLOAD %t10\nSTORE %t8\nLABEL L11\nLOAD %t8\nSTORE safeAnd@0\nCLEAR safeOr@0\nPUSH true\nSTORE %t11\nLOAD %t11\nJTRUE L13\nJMP L12\nLABEL L12\nPUSH 1\nPUSH 0\nDIV\nSTORE %t12\nLOAD %t12\nPUSH 0\nNE\nSTORE %t13\nLOAD %t13\nSTORE %t11\nLABEL L13\nLOAD %t11\nSTORE safeOr@0","result":"score = 75\npassed = true\ngrade = 11\nsafeAnd = false\nsafeOr = true"},"error":""},"priority":{"src":"int a = 2 + 3 * 4;","out":{"tokens":"1:1\tKEYWORD\tint\n1:5\tIDENT\ta\n1:7\tOP\t=\n1:9\tINTEGER\t2\n1:11\tOP\t+\n1:13\tINTEGER\t3\n1:15\tOP\t*\n1:17\tINTEGER\t4\n1:18\tDELIMITER\t;\n1:19\tEOF\t","ast":"Program\n  Declare int a\n    Binary +\n      Literal 2\n      Binary *\n        Literal 3\n        Literal 4","symbols":"语义检查通过\n名称\t类型\t作用域\t存储名\na\tint\t0\ta@0","tac":"a@0 = \u003c未初始化>\n%t1 = 3 * 4\n%t2 = 2 + %t1\na@0 = %t2","target":"CLEAR a@0\nPUSH 3\nPUSH 4\nMUL\nSTORE %t1\nPUSH 2\nLOAD %t1\nADD\nSTORE %t2\nLOAD %t2\nSTORE a@0","result":"a = 14"},"error":""},"brackets":{"src":"int a = (2 + 3) * 4;","out":{"tokens":"1:1\tKEYWORD\tint\n1:5\tIDENT\ta\n1:7\tOP\t=\n1:9\tDELIMITER\t(\n1:10\tINTEGER\t2\n1:12\tOP\t+\n1:14\tINTEGER\t3\n1:15\tDELIMITER\t)\n1:17\tOP\t*\n1:19\tINTEGER\t4\n1:20\tDELIMITER\t;\n1:21\tEOF\t","ast":"Program\n  Declare int a\n    Binary *\n      Binary +\n        Literal 2\n        Literal 3\n      Literal 4","symbols":"语义检查通过\n名称\t类型\t作用域\t存储名\na\tint\t0\ta@0","tac":"a@0 = \u003c未初始化>\n%t1 = 2 + 3\n%t2 = %t1 * 4\na@0 = %t2","target":"CLEAR a@0\nPUSH 2\nPUSH 3\nADD\nSTORE %t1\nLOAD %t1\nPUSH 4\nMUL\nSTORE %t2\nLOAD %t2\nSTORE a@0","result":"a = 20"},"error":""},"shadow":{"src":"int x = 3;\n{\n    int x = 9;\n    x = x + 1;\n}","out":{"tokens":"1:1\tKEYWORD\tint\n1:5\tIDENT\tx\n1:7\tOP\t=\n1:9\tINTEGER\t3\n1:10\tDELIMITER\t;\n2:1\tDELIMITER\t{\n3:5\tKEYWORD\tint\n3:9\tIDENT\tx\n3:11\tOP\t=\n3:13\tINTEGER\t9\n3:14\tDELIMITER\t;\n4:5\tIDENT\tx\n4:7\tOP\t=\n4:9\tIDENT\tx\n4:11\tOP\t+\n4:13\tINTEGER\t1\n4:14\tDELIMITER\t;\n5:1\tDELIMITER\t}\n5:2\tEOF\t","ast":"Program\n  Declare int x\n    Literal 3\n  Block\n    Declare int x\n      Literal 9\n    Assign x\n      Binary +\n        Variable x\n        Literal 1","symbols":"语义检查通过\n名称\t类型\t作用域\t存储名\nx\tint\t0\tx@0\nx\tint\t1\tx@1","tac":"x@0 = \u003c未初始化>\nx@0 = 3\nx@1 = \u003c未初始化>\nx@1 = 9\n%t1 = x@1 + 1\nx@1 = %t1","target":"CLEAR x@0\nPUSH 3\nSTORE x@0\nCLEAR x@1\nPUSH 9\nSTORE x@1\nLOAD x@1\nPUSH 1\nADD\nSTORE %t1\nLOAD %t1\nSTORE x@1","result":"x = 3"},"error":""},"short":{"src":"bool ok = false && (1 / 0 > 0);","out":{"tokens":"1:1\tKEYWORD\tbool\n1:6\tIDENT\tok\n1:9\tOP\t=\n1:11\tBOOLEAN\tfalse\n1:17\tOP\t&&\n1:20\tDELIMITER\t(\n1:21\tINTEGER\t1\n1:23\tOP\t/\n1:25\tINTEGER\t0\n1:27\tOP\t>\n1:29\tINTEGER\t0\n1:30\tDELIMITER\t)\n1:31\tDELIMITER\t;\n1:32\tEOF\t","ast":"Program\n  Declare bool ok\n    Binary &&\n      Literal false\n      Binary >\n        Binary /\n          Literal 1\n          Literal 0\n        Literal 0","symbols":"语义检查通过\n名称\t类型\t作用域\t存储名\nok\tbool\t0\tok@0","tac":"ok@0 = \u003c未初始化>\n%t1 = false\nCjmp (%t1, L1, L2)\nLabel L1\n%t2 = 1 / 0\n%t3 = %t2 > 0\n%t1 = %t3\nLabel L2\nok@0 = %t1","target":"CLEAR ok@0\nPUSH false\nSTORE %t1\nLOAD %t1\nJTRUE L1\nJMP L2\nLABEL L1\nPUSH 1\nPUSH 0\nDIV\nSTORE %t2\nLOAD %t2\nPUSH 0\nGT\nSTORE %t3\nLOAD %t3\nSTORE %t1\nLABEL L2\nLOAD %t1\nSTORE ok@0","result":"ok = false"},"error":""},"lexical":{"src":"int x = @;","out":{},"error":"词法错误（第 1 行，第 9 列）：非法字符 '@'"},"syntax":{"src":"int x = 1\nx = x + 1;","out":{"tokens":"1:1\tKEYWORD\tint\n1:5\tIDENT\tx\n1:7\tOP\t=\n1:9\tINTEGER\t1\n2:1\tIDENT\tx\n2:3\tOP\t=\n2:5\tIDENT\tx\n2:7\tOP\t+\n2:9\tINTEGER\t1\n2:10\tDELIMITER\t;\n2:11\tEOF\t"},"error":"语法错误（第 2 行，第 1 列）：此处需要 ';'"},"semantic":{"src":"int x = 1;\nbool ok = x;","out":{"tokens":"1:1\tKEYWORD\tint\n1:5\tIDENT\tx\n1:7\tOP\t=\n1:9\tINTEGER\t1\n1:10\tDELIMITER\t;\n2:1\tKEYWORD\tbool\n2:6\tIDENT\tok\n2:9\tOP\t=\n2:11\tIDENT\tx\n2:12\tDELIMITER\t;\n2:13\tEOF\t","ast":"Program\n  Declare int x\n    Literal 1\n  Declare bool ok\n    Variable x","symbols":"语义检查失败\n名称\t类型\t作用域\t存储名\nx\tint\t0\tx@0\nok\tbool\t0\tok@0\n语义错误（第 2 行，第 6 列）：ok 类型为 bool，赋值类型为 int"},"error":"语义错误（第 2 行，第 6 列）：ok 类型为 bool，赋值类型为 int"},"runtime":{"src":"int x;\nint y = x;","out":{"tokens":"1:1\tKEYWORD\tint\n1:5\tIDENT\tx\n1:6\tDELIMITER\t;\n2:1\tKEYWORD\tint\n2:5\tIDENT\ty\n2:7\tOP\t=\n2:9\tIDENT\tx\n2:10\tDELIMITER\t;\n2:11\tEOF\t","ast":"Program\n  Declare int x\n  Declare int y\n    Variable x","symbols":"语义检查通过\n名称\t类型\t作用域\t存储名\nx\tint\t0\tx@0\ny\tint\t0\ty@0","tac":"x@0 = \u003c未初始化>\ny@0 = \u003c未初始化>\ny@0 = x@0","target":"CLEAR x@0\nCLEAR y@0\nLOAD x@0\nSTORE y@0"},"error":"运行错误（第 2 行，第 9 列）：变量 x 尚未初始化"},"tokens":[{"kind":"KEYWORD","text":"int","line":1,"column":1},{"kind":"IDENT","text":"x","line":1,"column":5},{"kind":"OP","text":"=","line":1,"column":7},{"kind":"INTEGER","text":"0","line":1,"column":9},{"kind":"DELIMITER","text":";","line":1,"column":10},{"kind":"KEYWORD","text":"while","line":2,"column":1},{"kind":"DELIMITER","text":"(","line":2,"column":7},{"kind":"IDENT","text":"x","line":2,"column":8},{"kind":"OP","text":"\u003c","line":2,"column":10},{"kind":"INTEGER","text":"3","line":2,"column":12},{"kind":"DELIMITER","text":")","line":2,"column":13},{"kind":"DELIMITER","text":"{","line":2,"column":15},{"kind":"IDENT","text":"x","line":3,"column":5},{"kind":"OP","text":"=","line":3,"column":7},{"kind":"IDENT","text":"x","line":3,"column":9},{"kind":"OP","text":"+","line":3,"column":11},{"kind":"INTEGER","text":"1","line":3,"column":13},{"kind":"DELIMITER","text":";","line":3,"column":14},{"kind":"DELIMITER","text":"}","line":4,"column":1}],"translations":[["x@0 = \u003c未初始化>",["CLEAR x@0"]],["x@0 = 0",["PUSH 0","STORE x@0"]],["Label L1",["LABEL L1"]],["%t1 = x@0 \u003c 3",["LOAD x@0","PUSH 3","LT","STORE %t1"]],["Cjmp (%t1, L2, L3)",["LOAD %t1","JTRUE L2","JMP L3"]],["Label L2",["LABEL L2"]],["%t2 = x@0 + 1",["LOAD x@0","PUSH 1","ADD","STORE %t2"]],["x@0 = %t2",["LOAD %t2","STORE x@0"]],["Jmp L1",["JMP L1"]],["Label L3",["LABEL L3"]]],"frames":[[0,[],{}],[1,[],{}],[2,[0],{}],[3,[],{"x@0":0}],[4,[],{"x@0":0}],[5,[0],{"x@0":0}],[6,[0,3],{"x@0":0}],[7,[true],{"x@0":0}],[8,[],{"x@0":0,"%t1":true}],[9,[true],{"x@0":0,"%t1":true}],[12,[],{"x@0":0,"%t1":true}],[13,[0],{"x@0":0,"%t1":true}],[14,[0,1],{"x@0":0,"%t1":true}],[15,[1],{"x@0":0,"%t1":true}],[16,[],{"x@0":0,"%t1":true,"%t2":1}],[17,[1],{"x@0":0,"%t1":true,"%t2":1}],[18,[],{"x@0":1,"%t1":true,"%t2":1}],[4,[],{"x@0":1,"%t1":true,"%t2":1}],[5,[1],{"x@0":1,"%t1":true,"%t2":1}],[6,[1,3],{"x@0":1,"%t1":true,"%t2":1}],[7,[true],{"x@0":1,"%t1":true,"%t2":1}],[8,[],{"x@0":1,"%t1":true,"%t2":1}],[9,[true],{"x@0":1,"%t1":true,"%t2":1}],[12,[],{"x@0":1,"%t1":true,"%t2":1}],[13,[1],{"x@0":1,"%t1":true,"%t2":1}],[14,[1,1],{"x@0":1,"%t1":true,"%t2":1}],[15,[2],{"x@0":1,"%t1":true,"%t2":1}],[16,[],{"x@0":1,"%t1":true,"%t2":2}],[17,[2],{"x@0":1,"%t1":true,"%t2":2}],[18,[],{"x@0":2,"%t1":true,"%t2":2}],[4,[],{"x@0":2,"%t1":true,"%t2":2}],[5,[2],{"x@0":2,"%t1":true,"%t2":2}],[6,[2,3],{"x@0":2,"%t1":true,"%t2":2}],[7,[true],{"x@0":2,"%t1":true,"%t2":2}],[8,[],{"x@0":2,"%t1":true,"%t2":2}],[9,[true],{"x@0":2,"%t1":true,"%t2":2}],[12,[],{"x@0":2,"%t1":true,"%t2":2}],[13,[2],{"x@0":2,"%t1":true,"%t2":2}],[14,[2,1],{"x@0":2,"%t1":true,"%t2":2}],[15,[3],{"x@0":2,"%t1":true,"%t2":2}],[16,[],{"x@0":2,"%t1":true,"%t2":3}],[17,[3],{"x@0":2,"%t1":true,"%t2":3}],[18,[],{"x@0":3,"%t1":true,"%t2":3}],[4,[],{"x@0":3,"%t1":true,"%t2":3}],[5,[3],{"x@0":3,"%t1":true,"%t2":3}],[6,[3,3],{"x@0":3,"%t1":true,"%t2":3}],[7,[false],{"x@0":3,"%t1":true,"%t2":3}],[8,[],{"x@0":3,"%t1":false,"%t2":3}],[9,[false],{"x@0":3,"%t1":false,"%t2":3}],[10,[],{"x@0":3,"%t1":false,"%t2":3}],[20,[],{"x@0":3,"%t1":false,"%t2":3}]],"snippets":["def stage_reports(source):\n    \"\"\"每个阶段完成就交出结果，后续阶段出错时仍能查看前面的输出。\"\"\"\n    tokens = scan(source)\n    yield \"tokens\", [f\"{t.line}:{t.column}\\t{t.kind}\\t{t.text}\" for t in tokens]\n\n    tree = parse(tokens)\n    yield \"ast\", format_tree(tree)\n\n    analyzer = Analyzer()\n    try:\n        symbols = analyzer.analyze(tree)\n    except MiniCError as error:\n        yield \"symbols\", symbol_lines(analyzer.symbols, error)\n        raise\n    yield \"symbols\", symbol_lines(symbols)\n\n    tac = generate_ir(tree)\n    yield \"tac\", [str(q) for q in tac]\n\n    target = generate_target(tac)\n    yield \"target\", [str(i) for i in target]\n\n    memory = execute(target)\n    yield \"result\", result_lines(symbols, memory)","def scan(source):\n    tokens = []\n    lines = source.split(\"\\n\")\n    for line_number, line in enumerate(lines, start=1):\n        index = 0\n        while index \u003c len(line):\n            start = index\n            char = line[index]\n            index += 1\n            if char.isspace():\n                continue\n            if line.startswith(\"//\", start):\n                break\n            if char.isalpha() or char == \"_\":\n                while index \u003c len(line) and (line[index].isalnum() or line[index] == \"_\"):\n                    index += 1\n                kind = \"IDENT\"\n                if line[start:index] in KEYWORDS:\n                    kind = \"KEYWORD\"\n                elif line[start:index] in (\"true\", \"false\"):\n                    kind = \"BOOLEAN\"\n            elif char.isdecimal():\n                while index \u003c len(line) and line[index].isdecimal():\n                    index += 1\n                if index \u003c len(line) and (line[index].isalpha() or line[index] == \"_\"):\n                    raise MiniCError(\"词法\", Token(\"\", \"\", line_number, start + 1), \"标识符不能以数字开头\")\n                if index - start > MAX_INTEGER_DIGITS:\n                    position = Token(\"INTEGER\", \"\", line_number, start + 1)\n                    raise MiniCError(\"词法\", position, f\"整数常量超过 {MAX_INTEGER_DIGITS} 位\")\n                kind = \"INTEGER\"\n            elif line[start:start + 2] in DOUBLE_OPERATORS:\n                # 先识别 \u003c= 等双字符运算符，否则会误拆成 \u003c 和 =。\n                index += 1\n                kind = \"OP\"\n            elif char in \"+-*/\u003c>=!\":\n                kind = \"OP\"\n            elif char in \"(){};\":\n                kind = \"DELIMITER\"\n            else:\n                raise MiniCError(\"词法\", Token(\"\", char, line_number, start + 1), f\"非法字符 {char!r}\")\n            tokens.append(Token(kind, line[start:index], line_number, start + 1))\n    tokens.append(Token(\"EOF\", \"\", len(lines), len(lines[-1]) + 1))\n    return tokens","def addition(self):\n    # 加减两边先读完整的乘除表达式，乘除的优先级由此得到保证。\n    return self.binary_level(self.product, (\"+\", \"-\"))","def resolve(self, node):\n    # 从内向外寻找，第一个匹配项就是当前位置可见的声明。\n    for scope in reversed(self.scopes):\n        if node.token.text in scope:\n            symbol = scope[node.token.text]\n            node.storage = symbol.storage\n            return symbol\n    raise MiniCError(\"语义\", node.token, f\"变量 {node.token.text} 尚未声明\")","def while_statement(self, node):\n    start = self.label()\n    body = self.label()\n    end = self.label()\n    self.emit(node, \"Label\", start)\n    test = self.expression(node.children[0])\n    self.emit(node.children[0], \"Cjmp\", body, test, end)\n    self.emit(node, \"Label\", body)\n    self.statement(node.children[1])\n    # 循环体可能修改 x，因此回到条件计算处重新求 x \u003c 3。\n    self.emit(node, \"Jmp\", start)\n    self.emit(node, \"Label\", end)","def generate_target(quads):\n    code = []\n    for q in quads:\n        if q.op == \"Label\":\n            code.append(Instruction(\"LABEL\", q.result, q.token))\n        elif q.op == \"Jmp\":\n            code.append(Instruction(\"JMP\", q.result, q.token))\n        elif q.op == \"Cjmp\":\n            code.append(operand_instruction(q.first, q.operand_token(0)))\n            code.append(Instruction(\"JTRUE\", q.result, q.token))\n            code.append(Instruction(\"JMP\", q.second, q.token))\n        elif q.first == \"\u003c未初始化>\":\n            code.append(Instruction(\"CLEAR\", q.result, q.token))\n        else:\n            code.append(operand_instruction(q.first, q.operand_token(0)))\n            if q.second:\n                code.append(operand_instruction(q.second, q.operand_token(1)))\n                code.append(Instruction(BINARY[q.op], \"\", q.token))\n            elif q.op != \"=\":\n                code.append(Instruction(UNARY[q.op], \"\", q.token))\n            code.append(Instruction(\"STORE\", q.result, q.token))\n    return code","def execute(code):\n    labels = {}\n    for index, instruction in enumerate(code):\n        if instruction.op == \"LABEL\":\n            labels[instruction.argument] = index + 1\n\n    stack = []\n    memory = {}\n    pc = 0\n    while pc \u003c len(code):\n        instruction = code[pc]\n        op = instruction.op\n        arg = instruction.argument\n        pc += 1\n        if op == \"PUSH\":\n            if arg in (\"true\", \"false\"):\n                stack.append(arg == \"true\")\n            else:\n                stack.append(int(arg))\n        elif op == \"CLEAR\":\n            memory.pop(arg, None)\n        elif op == \"LOAD\":\n            if arg not in memory:\n                name = arg.split(\"@\")[0]\n                raise MiniCError(\"运行\", instruction.token, f\"变量 {name} 尚未初始化\")\n            stack.append(memory[arg])\n        elif op == \"STORE\":\n            memory[arg] = stack.pop()\n        elif op in OPERATIONS or op == \"DIV\":\n            # 计算 7 - 2 时先压 7 再压 2，因此先弹出的 2 是右操作数。\n            right = stack.pop()\n            left = stack.pop()\n            if op == \"DIV\":\n                stack.append(divide(left, right, instruction.token))\n            else:\n                value = OPERATIONS[op](left, right)\n                if abs(value) >= INTEGER_BOUND:\n                    raise MiniCError(\"运行\", instruction.token, f\"整数运算结果超过 {MAX_INTEGER_DIGITS} 位\")\n                stack.append(value)\n        elif op in UNARY:\n            stack.append(UNARY[op](stack.pop()))\n        elif op == \"JTRUE\":\n            if stack.pop():\n                pc = labels[arg]\n        elif op == \"JMP\":\n            pc = labels[arg]\n        elif op != \"LABEL\":\n            raise ValueError(f\"未知目标指令 {op}\")\n    return memory","def check_assignment(self, node, symbol):\n    actual = self.expression_type(node.children[0])\n    if actual != symbol.type_name:\n        raise MiniCError(\"语义\", node.token, f\"{symbol.name} 类型为 {symbol.type_name}，赋值类型为 {actual}\")"]}</script>
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("dataset").textContent);
+const chapters = [
+  {id:"start", nav:"先跑一遍", topic:"全程预览", title:"四行代码，怎样跑起来？", lead:"先读这段小程序。x 从 0 出发，每绕一圈就加 1。你能猜到它停在哪里吗？接下来我们一路跟着这个 x，看一段文字怎样变成机器能够执行的动作。", lab:"先预测，再看编译结果", why:"先分清两件事", text:"编译器负责翻译，虚拟机负责执行。前五个模块依次产出单词、树、符号表、三地址码和目标指令。直到虚拟机读到 STORE，程序运行时的变量值才被写入存储区。", file:"minic.py", func:"stage_reports", q:"如果只想查看循环的结构，读到哪里就够了？", opts:["Token 序列","抽象语法树","执行结果"], correct:1, reason:"语法树已经把条件和循环体分成两个子节点。"},
+  {id:"tokens", nav:"词法分析", topic:"从字符到单词", title:"编译器怎样读出一个词？", lead:"源码是一串字符。扫描器从左到右，把相邻字符拼成可以交给下一阶段的单元，叫作 Token。点击不同的 x，看看它们的类别和位置。", lab:"点一个 Token，回到源码找它", why:"为什么要记行和列？", text:"同一个变量名可以出现许多次。Token 保存类别、原文、行和列，后续阶段才能指出究竟是哪一次使用出了问题。扫描器遇到 <= 时会先匹配两个字符，空格和行注释会被跳过，末尾另加 EOF 表示输入结束。", file:"compiler/lexer.py", func:"scan", q:"扫描 x <= 3 时，<= 会产生几个 Token？", opts:["一个","两个"], correct:0, reason:"扫描器先匹配双字符运算符，<= 整体是一个 OP。"},
+  {id:"ast", nav:"语法分析", topic:"从单词到结构", title:"乘法为什么先算？", lead:"Token 的顺序告诉我们谁在前面。语法分析还要回答谁和谁组成一组。切换括号，看看哪一个运算成了树的根。", lab:"换一对括号，看树怎么变", why:"沿着解析函数读优先级", text:"这里使用递归下降。读加减时，addition 先让 product 读完一段乘除，再把两边挂到加减节点下面。括号让解析器在括号内重新读一个完整表达式。回到 while，条件表达式和循环体也各自成为子树。", file:"compiler/parser.py", func:"Parser.addition", q:"在 (2 + 3) * 4 中，表达式子树的根是什么？", opts:["Binary +","Binary *","Literal 4"], correct:1, reason:"括号里的加法是左子树，最外层乘法把它和 4 连起来。"},
+  {id:"symbols", nav:"语义分析", topic:"从名字到存储位置", title:"两个 x 是同一个变量吗？", lead:"语法树已经搭好了。接下来要核对每个名字在哪里声明、是什么类型。切换到同名变量的例子，观察两个 x 最终各自绑定到哪里。", lab:"把声明与符号表对起来", why:"符号表怎样帮助类型检查？", text:"进入语句块就建立一层作用域，查名字时从内向外寻找。符号表记录名称、类型、作用域和唯一存储名。知道 x 是 int 后，语义分析器就能推出 x < 3 的结果是 bool，可以用作 while 的条件。", file:"compiler/semantic.py", func:"Analyzer.resolve", q:"内层有 int x = 9，执行内层的 x = x + 1 后，外层 x 是多少？", opts:["3","9","10"], correct:0, reason:"赋值命中内层的 x@1。外层 x@0 仍然存着 3。"},
+  {id:"tac", nav:"中间代码", topic:"从树到控制流", title:"循环的那一圈，藏在哪里？", lead:"沿着树可以看懂结构，机器却要知道下一步去哪里。三地址码（TAC）把每次计算、赋值和跳转排成一列。沿着条件为真和为假的两条路，各走一次。", lab:"追踪条件跳转", why:"为什么回到判断之前？", text:"Label 给位置起名字，Cjmp 根据真假选择目的地，Jmp 直接跳转。循环体会修改 x，回到 L1 才会用新值重新计算条件。if-else 也使用真假目标，两条分支在末尾汇合。短路逻辑则把整个右操作数放在只有必要时才会进入的分支里。", file:"compiler/ir.py", func:"Generator.while_statement", q:"如果循环体末尾直接跳回 L2，会发生什么？", opts:["少循环一次","一直执行循环体","立即退出"], correct:1, reason:"L2 是循环体入口，跳到这里会绕过条件重算和退出判断。"},
+  {id:"target", nav:"目标指令", topic:"从三地址码到栈指令", title:"一条加法，要翻译几步？", lead:"TAC 直接写出左右操作数和结果。栈式机器则先把操作数送上栈，执行运算，再保存结果。选一条 TAC，查看它实际生成的那组指令。", lab:"逐条对照翻译结果", why:"栈顶的左右顺序", text:"LOAD 读取存储位置，PUSH 压入常量，STORE 把栈顶写回。二元运算先弹出右操作数，再弹出左操作数。对 7 - 2 来说，先弹到 2，后弹到 7，结果才是 5。声明处的 CLEAR 用来清除上次进入该声明时的旧值。", file:"compiler/codegen.py", func:"generate_target", q:"执行 PUSH 7、PUSH 2、SUB 后，栈顶是什么？", opts:["-5","5","2"], correct:1, reason:"第二个入栈的 2 是右操作数，所以计算 7 - 2。"},
+  {id:"vm", nav:"虚拟机", topic:"逐条执行", title:"亲手走完最后一圈", lead:"程序计数器 PC 指向下一条指令。现在每前进一步，就执行一条真实记录中的目标指令。先看比较结果去哪儿了，再跳到最后一次比较，看循环怎样停下。", lab:"虚拟机执行回放", why:"什么时候可以读出答案？", text:"每一步都从 PC 取指。普通指令继续往下走，跳转会改写 PC。虚拟机先把标号映射为指令位置；跳转直接到标号之后。PC 越过最后一条指令时，读取顶层变量的最终值，这个例子得到 x = 3。", file:"compiler/vm.py", func:"execute", q:"x 从 0 加到 3 的过程中，x < 3 一共判断几次？", opts:["3 次","4 次","5 次"], correct:1, reason:"x 为 0、1、2 时进入循环，x 为 3 时还要再判断一次才能退出。"},
+  {id:"errors", nav:"错误与复习", topic:"独立复现", title:"程序停在哪一站？", lead:"调试时，先问上一阶段留下了什么，再读报错的行和列。选一个错误，把源码、诊断和本次产生的文件对起来。", lab:"观察四种失败现场", why:"回到自己的终端", text:"运行 python3 minic.py examples/loop.mc，沿 output/loop 里的六份文件讲一遍。再运行 arithmetic.mc 检查括号优先级，运行 branch.mc 解释为什么右侧除零可以被跳过。最后用 python3 -m unittest discover -s tests -v 检查源码修改有没有破坏这些行为。", file:"compiler/semantic.py", func:"Analyzer.check_assignment", q:"int x; int y = x; 会在哪一步被拦住？", opts:["语法分析","语义分析","虚拟机执行"], correct:2, reason:"x 已经声明且类型相符。虚拟机真正读取它的存储位置时，才发现尚未初始化。"}
+];
+const byId = id => document.getElementById(id);
+const escapeHTML = value => String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+const lab = byId("lab");
+function board(label, code) {
+  return '<div class="board"><span class="caption">'+escapeHTML(label)+'</span><pre>'+escapeHTML(code)+'</pre></div>';
+}
+function split(left, right) { return '<div class="split">'+left+right+'</div>'; }
+function button(label, action) {
+  const node = document.createElement("button");
+  node.type = "button";
+  node.className = "btn";
+  node.textContent = label;
+  node.onclick = action;
+  return node;
+}
+// 选项只更新实验区，保留当前按钮的键盘焦点。
+function choices(labels, initial, draw) {
+  lab.innerHTML = '<div class="controls" id="choices"></div><div id="experiment"></div>';
+  function select(index) {
+    [...byId("choices").children].forEach((b,i) => b.setAttribute("aria-pressed", i===index));
+    draw(index, byId("experiment"));
+  }
+  labels.forEach((label,i) => byId("choices").append(button(label, () => select(i))));
+  select(initial);
+}
+function intro() {
+  const ids = ["loop","arithmetic","branch"];
+  const prompts = ["循环结束时，x 会停在哪里？","加上一对括号，a 和 b 还相等吗？","最后两行的除法会执行吗？"];
+  choices(["循环","算术","分支"],0,(i,pane) => {
+    const sample = data[ids[i]];
+    pane.innerHTML = '<div class="welcome">'+split(board("examples/"+ids[i]+".mc",sample.src),
+      '<div><p class="caption">读完源码，先猜结果</p><h3>'+prompts[i]+'</h3><div class="big" id="predicted">?</div><button class="btn primary" id="reveal">查看执行结果</button></div>')+'</div>';
+    byId("reveal").onclick = () => {
+      byId("predicted").className = "result";
+      byId("predicted").textContent = sample.out.result;
+      byId("reveal").disabled = true;
+    };
+    const path = document.createElement("div");
+    path.className="path";
+    for (const c of chapters.slice(1,7)) {
+      const link=document.createElement("a"); link.href="#"+c.id; link.textContent=c.nav; path.append(link);
+    }
+    pane.append(path);
+  });
+}
+function tokens() {
+  lab.innerHTML = split('<div class="board"><span class="caption">examples/loop.mc</span><pre id="source"></pre></div>',
+    '<div><span class="caption">按源码顺序排列的 Token</span><div id="tokenlist" class="tokens"></div><p id="position" class="note" role="status"></p></div>');
+  const rows = data.loop.src.split("\n");
+  const labels = {IDENT:"标识符",OP:"运算符",INTEGER:"整数常量",DELIMITER:"界符",KEYWORD:"关键字"};
+  function select(i) {
+    const t=data.tokens[i];
+    byId("source").innerHTML=rows.map((row,n) => {
+      if(n+1!==t.line) return escapeHTML(row);
+      const at=t.column-1;
+      return escapeHTML(row.slice(0,at))+"<mark>"+escapeHTML(t.text)+"</mark>"+escapeHTML(row.slice(at+t.text.length));
+    }).join("\n");
+    byId("position").textContent=labels[t.kind]+" · "+t.kind+" ｜ 第 "+t.line+" 行，第 "+t.column+" 列";
+    [...byId("tokenlist").children].forEach((b,n)=>b.setAttribute("aria-pressed",n===i));
+  }
+  data.tokens.forEach((t,i)=>{
+    const b=button(t.text,()=>select(i));
+    b.setAttribute("aria-label",t.text+"，第 "+t.line+" 行第 "+t.column+" 列"); byId("tokenlist").append(b);
+  });
+  select(7);
+}
+function ast() {
+  choices(["2 + 3 × 4","(2 + 3) × 4","回到 while"],0,(i,pane)=>{
+    const sample=data[["priority","brackets","loop"][i]];
+    pane.innerHTML=split(board("MiniC 源码",sample.src),board("语法树 · 缩进表示子节点",sample.out.ast))+
+      '<p class="note">'+["Binary + 接住左边的 2 和右边整棵乘法子树，结果为 14。","根变成 Binary *，左边整棵加法子树先得到 5，最终结果为 20。","找到 While 的两个直接子节点：Binary &lt; 是条件，Block 是每轮执行的循环体。"][i]+'</p>';
+  });
+}
+function symbols() {
+  choices(["顶层的 x","块内再声明 x","试着把 int 赋给 bool"],0,(i,pane)=>{
+    const sample=data[["loop","shadow","semantic"][i]];
+    pane.innerHTML=split(board("MiniC 源码",sample.src),board("symbols.txt",sample.out.symbols))+
+      '<p class="note">'+["x@0 中的 0 是作用域编号。循环体对 x 的读写都回到这个位置。","查找从内层开始，所以块内修改 x@1。运行结束时，顶层 x 的值仍为 3。","赋值右侧 x 的类型是 int，左侧 ok 需要 bool。编译在此停止，符号表记录了出错前收集到的声明。"][i]+'</p>';
+  });
+}
+function tac() {
+  choices(["条件为真","条件为假","逻辑短路"],0,(i,pane)=>{
+    const sample=i===2?data.short:data.loop;
+    const dest=["L2","L3","L2"][i];
+    const lines=sample.out.tac.split("\n").map(s=>{
+      const line=escapeHTML(s);
+      return s==="Label "+dest ? "<mark>"+line+"</mark>" : line;
+    });
+    pane.innerHTML=split(board("MiniC 源码",sample.src),'<div class="board"><span class="caption">tac.txt · 本次跳转目的地</span><pre>'+lines.join("\n")+'</pre></div>')+
+      '<p class="note">'+["假设 x 为 2。%t1 得到 true，Cjmp 选择 L2。执行加一和赋值，再从 Jmp L1 回到条件。","假设 x 为 3。%t1 得到 false，Cjmp 直接转到 L3，循环结束。","左侧 false 已经决定了 && 的结果，Cjmp 选择 L2。除法虽然出现在 TAC 里，这次执行却跳过了它。"][i]+'</p>';
+  });
+}
+function target() {
+  lab.innerHTML=split('<div><label class="caption">选择一条三地址码</label><div class="rows" id="quads"></div></div>',
+    '<div><div class="board"><span class="caption">对应的目标指令</span><pre id="assembly"></pre></div><p class="note" id="asmNote"></p></div>');
+  const notes=["CLEAR 清除旧值。以后读取前必须先写入。","常量 0 入栈，再写入 x@0。","标号给条件重算的位置命名。","读取 x，压入 3，比较，再把布尔结果写入临时变量。","读取布尔结果。为真执行 JTRUE 的跳转，为假继续执行 JMP。","这个标号指出循环体入口。","读取 x，压入 1，做加法，再保存临时结果。","读取刚算出的临时值，覆盖变量 x。","直接跳回判断条件处。","循环从这里退出。"];
+  function select(i){
+    byId("assembly").textContent=data.translations[i][1].join("\n");
+    byId("asmNote").textContent=notes[i];
+    [...byId("quads").children].forEach((b,n)=>b.setAttribute("aria-pressed",i===n));
+  }
+  data.translations.forEach(([q],i)=>byId("quads").append(button(q,()=>select(i))));
+  select(6);
+}
+function vm() {
+  const frames=data.frames, last=frames.length-1, code=data.loop.out.target.split("\n");
+  lab.innerHTML='<div class="controls" id="vmControls"></div>'+split(
+    '<div class="board"><span class="caption">目标指令 · PC 从 0 开始</span><pre id="listing" style="max-height:240px"></pre></div>',
+    '<div><span id="stepStatus" class="status" role="status"></span><div class="stats"><div class="stat">PC<br><strong id="pc"></strong></div><div class="stat">变量 x<br><strong id="x"></strong></div></div><p class="caption">操作数栈 · 右端是栈顶</p><pre id="stack" class="result"></pre><p class="caption">临时变量</p><pre id="temps" class="result"></pre></div>')+
+    '<label for="timeline" class="caption">拖动回放进度</label><input id="timeline" class="track" type="range" min="0" value="0" max="'+last+'">';
+  let index=0;
+  function move(to){
+    index=Math.max(0,Math.min(to,last));
+    const [pc,stack,memory]=frames[index];
+    byId("timeline").value=index;
+    byId("listing").innerHTML=code.map((op,i)=>{
+      const row=String(i).padStart(2,"0")+"   "+escapeHTML(op);
+      return i===pc?"<mark>"+row+"</mark>":row;
+    }).join("\n");
+    const listing=byId("listing"), mark=listing.querySelector("mark");
+    if(mark) listing.scrollTop+=mark.getBoundingClientRect().top-listing.getBoundingClientRect().top-listing.clientHeight/2;
+    else listing.scrollTop=listing.scrollHeight;
+    byId("stepStatus").textContent=(index===last?"已结束":"下一条待执行")+" · "+index+" / "+last+" 步";
+    byId("pc").textContent=pc;
+    byId("x").textContent=memory["x@0"]??"未赋值";
+    byId("stack").textContent="["+stack.join(", ")+"]";
+    byId("temps").textContent=Object.entries(memory).filter(([k])=>k.startsWith("%")).map(([k,v])=>k+" = "+v).join("\n")||"尚未写入";
+    prev.disabled=index===0; next.disabled=index===last;
+  }
+  const prev=button("上一步",()=>move(index-1)), next=button("执行一步",()=>move(index+1)); next.classList.add("primary");
+  const finalCompare=frames.findIndex(([pc,,memory])=>code[pc]==="LT" && memory["x@0"]===3);
+  byId("vmControls").append(prev,next,button("最后一次比较",()=>move(finalCompare)),button("看终态",()=>move(last)));
+  byId("timeline").oninput=e=>move(Number(e.target.value));
+  move(0);
+}
+function errors() {
+  choices(["非法字符","缺少分号","类型不匹配","未初始化"],0,(i,pane)=>{
+    const sample=data[["lexical","syntax","semantic","runtime"][i]];
+    const produced=Object.keys(sample.out).map(k=>k+".txt").join("、")||"尚无完整阶段输出";
+    pane.innerHTML=split(board("出错的源程序",sample.src),board("实际诊断",sample.error))+
+      '<p class="note">本次输出：'+escapeHTML(produced)+'</p><p>'+["扫描器遇到 @ 时就停下了。把它换成整数字面量，例如 1。","解析器在第二行看到 x 时还在等待分号。把分号补在第一行末尾。","符号表里能查到 x 和 ok。把右侧改成 x > 0，赋值两边就都是 bool。","所有编译阶段都通过了。给 x 一个初值，LOAD 才能读到它。"][i]+'</p>';
+  });
+}
+const labs=[intro,tokens,ast,symbols,tac,target,vm,errors];
+const nav=byId("nav");
+chapters.forEach((c,i)=>{
+  const a=document.createElement("a"); a.href="#"+c.id; a.innerHTML='<span>'+String(i+1).padStart(2,"0")+'</span>'+c.nav; nav.append(a);
+});
+const selectedAnswers=new Map();
+function render(focus=false){
+  const index=Math.max(0,chapters.findIndex(c=>"#"+c.id===location.hash));
+  const c=chapters[index];
+  document.title=c.nav+" · MiniC 学习手册";
+  chapters.forEach((chapter,i)=>{
+    if(i===index) nav.children[i].setAttribute("aria-current","page");
+    else nav.children[i].removeAttribute("aria-current");
+  });
+  byId("counter").textContent=String(index+1).padStart(2,"0")+" / 08";
+  for(const [id,value] of Object.entries({topic:c.topic,title:c.title,lead:c.lead,labtitle:c.lab,why:c.why,explain:c.text,
+      summary:"对照源码 · "+c.func,snippet:data.snippets[index],question:c.q})) byId(id).textContent=value;
+  byId("implementation").open=false;
+  byId("filelink").textContent="打开仓库文件 "+c.file;
+  byId("filelink").href="https://github.com/BorderRegion/minic-compiler/blob/main/"+c.file;
+  labs[index]();
+  const answers=byId("answers"),feedback=byId("feedback"); answers.replaceChildren(); feedback.textContent="";
+  function respond(i){
+    selectedAnswers.set(index,i);
+    [...answers.children].forEach((b,n)=>b.setAttribute("aria-pressed",n===i));
+    feedback.textContent=(i===c.correct?"答对了。":"再想想。")+c.reason;
+  }
+  c.opts.forEach((opt,i)=>answers.append(button(opt,()=>respond(i))));
+  if(selectedAnswers.has(index)) respond(selectedAnswers.get(index));
+  const footer=byId("footnav"); footer.replaceChildren();
+  if(index){const a=document.createElement("a");a.href="#"+chapters[index-1].id;a.textContent="← "+chapters[index-1].nav;footer.append(a);}
+  else footer.append(document.createElement("span"));
+  const next=document.createElement("a"); next.className="primary";
+  next.href="#"+chapters[(index+1)%chapters.length].id;
+  next.textContent=index===chapters.length-1?"回到开篇 ↑":"下一节 · "+chapters[index+1].nav+" →";footer.append(next);
+  if(focus){byId("title").focus({preventScroll:true});window.scrollTo(0,0);}
+}
+window.addEventListener("hashchange",()=>{if(location.hash!=="#title")render(true);});
+render();
+</script></body></html>

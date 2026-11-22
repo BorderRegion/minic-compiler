@@ -1,0 +1,49 @@
+Program
+  Declare int score
+    Literal 75
+  Declare bool passed
+    Binary &&
+      Binary >=
+        Variable score
+        Literal 60
+      Binary <=
+        Variable score
+        Literal 100
+  Declare int grade
+    Literal 0
+  If
+    Variable passed
+    Block
+      Assign grade
+        Literal 1
+  If
+    Binary ||
+      Unary !
+        Variable passed
+      Binary ==
+        Variable score
+        Literal 100
+    Block
+      Assign grade
+        Literal 2
+    Block
+      Assign grade
+        Binary +
+          Variable grade
+          Literal 10
+  Declare bool safeAnd
+    Binary &&
+      Literal false
+      Binary >
+        Binary /
+          Literal 1
+          Literal 0
+        Literal 0
+  Declare bool safeOr
+    Binary ||
+      Literal true
+      Binary !=
+        Binary /
+          Literal 1
+          Literal 0
+        Literal 0

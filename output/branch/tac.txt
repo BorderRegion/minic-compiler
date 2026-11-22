@@ -1,0 +1,50 @@
+score@0 = <未初始化>
+score@0 = 75
+passed@0 = <未初始化>
+%t2 = score@0 >= 60
+%t1 = %t2
+Cjmp (%t1, L1, L2)
+Label L1
+%t3 = score@0 <= 100
+%t1 = %t3
+Label L2
+passed@0 = %t1
+grade@0 = <未初始化>
+grade@0 = 0
+Cjmp (passed@0, L3, L4)
+Label L3
+grade@0 = 1
+Label L4
+%t5 = ! passed@0
+%t4 = %t5
+Cjmp (%t4, L9, L8)
+Label L8
+%t6 = score@0 == 100
+%t4 = %t6
+Label L9
+Cjmp (%t4, L5, L7)
+Label L5
+grade@0 = 2
+Jmp L6
+Label L7
+%t7 = grade@0 + 10
+grade@0 = %t7
+Label L6
+safeAnd@0 = <未初始化>
+%t8 = false
+Cjmp (%t8, L10, L11)
+Label L10
+%t9 = 1 / 0
+%t10 = %t9 > 0
+%t8 = %t10
+Label L11
+safeAnd@0 = %t8
+safeOr@0 = <未初始化>
+%t11 = true
+Cjmp (%t11, L13, L12)
+Label L12
+%t12 = 1 / 0
+%t13 = %t12 != 0
+%t11 = %t13
+Label L13
+safeOr@0 = %t11

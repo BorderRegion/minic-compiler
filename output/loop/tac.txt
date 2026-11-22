@@ -1,0 +1,10 @@
+x@0 = <未初始化>
+x@0 = 0
+Label L1
+%t1 = x@0 < 3
+Cjmp (%t1, L2, L3)
+Label L2
+%t2 = x@0 + 1
+x@0 = %t2
+Jmp L1
+Label L3

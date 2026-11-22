@@ -1,0 +1,5 @@
+score = 75
+passed = true
+grade = 11
+safeAnd = false
+safeOr = true

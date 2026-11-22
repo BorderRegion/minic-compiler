@@ -1,0 +1,23 @@
+Program
+  Declare int a
+    Binary +
+      Literal 2
+      Binary *
+        Literal 3
+        Literal 4
+  Declare int b
+    Binary *
+      Binary +
+        Literal 2
+        Literal 3
+      Literal 4
+  Declare int difference
+  Assign difference
+    Binary -
+      Variable b
+      Variable a
+  Declare int quotient
+    Binary /
+      Unary -
+        Literal 7
+      Literal 2

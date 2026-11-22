@@ -1,0 +1,39 @@
+CLEAR a@0
+PUSH 3
+PUSH 4
+MUL
+STORE %t1
+PUSH 2
+LOAD %t1
+ADD
+STORE %t2
+LOAD %t2
+STORE a@0
+CLEAR b@0
+PUSH 2
+PUSH 3
+ADD
+STORE %t3
+LOAD %t3
+PUSH 4
+MUL
+STORE %t4
+LOAD %t4
+STORE b@0
+CLEAR difference@0
+LOAD b@0
+LOAD a@0
+SUB
+STORE %t5
+LOAD %t5
+STORE difference@0
+CLEAR quotient@0
+PUSH 7
+NEG
+STORE %t6
+LOAD %t6
+PUSH 2
+DIV
+STORE %t7
+LOAD %t7
+STORE quotient@0

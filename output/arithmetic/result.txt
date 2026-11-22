@@ -1,0 +1,4 @@
+a = 14
+b = 20
+difference = 6
+quotient = -3

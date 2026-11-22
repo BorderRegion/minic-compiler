@@ -1,0 +1,12 @@
+Program
+  Declare int x
+    Literal 0
+  While
+    Binary <
+      Variable x
+      Literal 3
+    Block
+      Assign x
+        Binary +
+          Variable x
+          Literal 1
